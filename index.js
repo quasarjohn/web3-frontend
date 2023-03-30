@@ -163,12 +163,14 @@ let verifierFactoryContract;
 let activeAccount;
 let web3;
 
+// check if there's connection to wallet
 if (typeof window.ethereum !== "undefined") {
   ethereum.request({ method: "eth_requestAccounts" }).then((accounts) => {
     const account = accounts[0];
     activeAccount = accounts[0];
     web3 = new Web3(window.ethereum);
 
+    // make instance of the factory contract
     verifierFactoryContract = new web3.eth.Contract(
       factoryAbi,
       verifierFactoryAddress
@@ -180,6 +182,7 @@ if (typeof window.ethereum !== "undefined") {
   window.open("https://metamask.io/download/", "_blank");
 }
 
+// helper function for sending transactions
 function sendTransaction(tx) {
   return new Promise(async (resolve, reject) => {
     try {
@@ -205,6 +208,7 @@ function sendTransaction(tx) {
 document.getElementById("addDocument").addEventListener("click", async () => {
   const docHash = document.getElementById("documentHash").value;
 
+  // create new document and save to blockchain
   const transaction = verifierFactoryContract.methods.createDocument(
     "0xE3F687CfCcAA0B069D5958edEE4E9a6742580Ed8",
     docHash
@@ -216,12 +220,15 @@ document.getElementById("addDocument").addEventListener("click", async () => {
 document.getElementById("getDocument").addEventListener("click", async () => {
   const docHash = document.getElementById("documentHash").value;
 
+  // get the document address
   const documentAddress = await verifierFactoryContract.methods
     .getDocument(docHash)
     .call();
 
+  // make instance of the document smart contract
   const documentVerifier = new web3.eth.Contract(documentAbi, documentAddress);
 
+  // get the owner
   const documentOwner = await documentVerifier.methods.owner().call();
 
   alert(documentOwner);
